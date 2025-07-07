@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Chatbot - Your Personal Music Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+        
+        .container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .chat-section {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .chat-header h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            height: 400px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 15px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+        
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .bot-message {
+            background: white;
+            color: #333;
+            border: 2px solid #e9ecef;
+            white-space: pre-wrap;
+        }
+        
+        .chat-input {
+            padding: 1rem;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input input:focus {
+            border-color: #667eea;
+        }
+        
+        .chat-input button {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .chat-input button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .quick-actions {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+        
+        .quick-actions h3 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .action-button {
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+            color: #666;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .trending-songs {
+            margin-top: 2rem;
+        }
+        
+        .song-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .song-item h4 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .song-item p {
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .chat-messages {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎵 Music Chatbot</h1>
+        <p>Your personal AI assistant for trending music, artists, and lyrics</p>
+    </div>
+    
+    <div class="container">
+        <div class="chat-section">
+            <div class="chat-header">
+                <h2>💬 Chat with Music Bot</h2>
+                <p>Ask me about trending songs, artists, or lyrics!</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    Hello! I'm your music chatbot assistant. I can help you with:
+                    
+                    🎵 Trending songs and charts
+                    🎤 Artist information and discography
+                    📝 Song lyrics
+                    🔍 Music search
+                    
+                    What would you like to know about music today?
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                Thinking about music... 🎵
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="Ask me about music..." onkeypress="handleKeyPress(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+        
+        <div class="quick-actions">
+            <h3>🚀 Quick Actions</h3>
+            <div class="action-buttons">
+                <button class="action-button" onclick="quickAction('What are the trending songs?')">
+                    📈 Show Trending Songs
+                </button>
+                <button class="action-button" onclick="quickAction('Tell me about Taylor Swift')">
+                    🎤 Artist Info (Taylor Swift)
+                </button>
+                <button class="action-button" onclick="quickAction('Search for Shape of You')">
+                    🔍 Search Songs
+                </button>
+                <button class="action-button" onclick="quickAction('Get lyrics for Blinding Lights')">
+                    📝 Get Lyrics
+                </button>
+            </div>
+            
+            <div class="trending-songs" id="trendingSongs"></div>
+        </div>
+    </div>
+    
+    <script>
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function quickAction(message) {
+            document.getElementById('userInput').value = message;
+            sendMessage();
+        }
+        
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+            
+            const chatMessages = document.getElementById('chatMessages');
+            const loading = document.getElementById('loading');
+            
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user-message';
+            userMessage.textContent = message;
+            chatMessages.appendChild(userMessage);
+            
+            // Clear input
+            userInput.value = '';
+            
+            // Show loading
+            loading.classList.add('show');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading
+                loading.classList.remove('show');
+                
+                // Add bot response
+                const botMessage = document.createElement('div');
+                botMessage.className = 'message bot-message';
+                botMessage.textContent = data.response || 'Sorry, I encountered an error.';
+                chatMessages.appendChild(botMessage);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+            } catch (error) {
+                // Hide loading
+                loading.classList.remove('show');
+                
+                // Add error message
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'message bot-message';
+                errorMessage.textContent = 'Sorry, I encountered an error. Please try again.';
+                chatMessages.appendChild(errorMessage);
+                
+                console.error('Error:', error);
+            }
+        }
+        
+        // Load trending songs on page load
+        async function loadTrendingSongs() {
+            try {
+                const response = await fetch('/trending?limit=5');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const trendingSongs = document.getElementById('trendingSongs');
+                    trendingSongs.innerHTML = '<h4>🔥 Current Top Songs</h4>';
+                    
+                    data.songs.forEach(song => {
+                        const songItem = document.createElement('div');
+                        songItem.className = 'song-item';
+                        songItem.innerHTML = `
+                            <h4>${song.rank}. ${song.title}</h4>
+                            <p><strong>Artist:</strong> ${song.artist}</p>
+                            <p><strong>Album:</strong> ${song.album}</p>
+                            <p><strong>Popularity:</strong> ${song.popularity}/100</p>
+                        `;
+                        trendingSongs.appendChild(songItem);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading trending songs:', error);
+            }
+        }
+        
+        // Load trending songs when page loads
+        window.addEventListener('load', loadTrendingSongs);
+    </script>
+</body>
+</html>
