@@ -203,6 +203,10 @@ $RECYCLE.BIN/
 .env
 !.env.example
 
+# Docker
+docker-compose.override.yml
+.docker/
+
 # Exclude generated files
 *.generated.*
 output/
